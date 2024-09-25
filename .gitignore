@@ -32,8 +32,7 @@ out
 .DS_Store
 dist
 logs
+tmp
 
 out_data
-
-
-
+_local/
