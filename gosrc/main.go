@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/EagleLizard/jcd-api/gosrc/api/ctrl"
+	"github.com/EagleLizard/jcd-api/gosrc/lib/config"
 	"github.com/EagleLizard/jcd-api/gosrc/lib/logger"
 	"github.com/EagleLizard/jcd-api/gosrc/util/chron"
 	"github.com/go-chi/chi/v5"
@@ -21,10 +22,11 @@ import (
 )
 
 func main() {
-	startServer()
+	cfg := config.JcdApiConfig
+	startServer(cfg)
 }
 
-func startServer() {
+func startServer(cfg *config.JcdApiConfigType) {
 	loggerCfg := logger.Config{
 		Encoder: zapcore.NewJSONEncoder(logger.GetDefaultEncoderConfig()),
 	}
@@ -45,20 +47,22 @@ func startServer() {
 	handler = someMiddleware(handler)
 	handler = getAccessLogMiddleware(*logger.Logger)(handler)
 
-	host := "127.0.0.1"
-	port := "4444"
-
-	ctx, cancel := signal.NotifyContext(
-		context.Background(),
-		syscall.SIGINT,
-		syscall.SIGTERM,
-	)
-	defer cancel()
+	ctx := context.Background()
 
 	httpServer := &http.Server{
-		Addr:    net.JoinHostPort(host, port),
+		Addr: net.JoinHostPort(
+			cfg.Host,
+			cfg.Port,
+		),
 		Handler: handler,
 	}
+	runServer(ctx, httpServer)
+}
+
+func runServer(ctx context.Context, httpServer *http.Server) {
+
+	ctx, cancel := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
+	defer cancel()
 
 	go func() {
 		fmt.Fprintf(os.Stdout, "listening on %s\n", httpServer.Addr)
@@ -74,7 +78,7 @@ func startServer() {
 	go func() {
 		defer wg.Done()
 		<-ctx.Done()
-		logger.Logger.Sugar().Infof("got interrupt signal")
+		fmt.Fprintf(os.Stdout, "got interrupt signal\n")
 		shutdownCtx, cancel := context.WithTimeout(
 			context.Background(),
 			10*time.Second,
