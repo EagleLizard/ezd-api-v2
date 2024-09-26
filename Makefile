@@ -13,3 +13,5 @@ watch: build
 	# fswatch -r ./${GO_SRC_DIR} | xargs -n1 -I{} make build
 watch-build: build
 	fswatch -r ./${GO_SRC_DIR} | xargs -n1 -I{} make build
+watch-sfs:
+	air --build.cmd "go build -o ./bin/sfs ./cmd/sfs/sfs.go" --build.bin "./bin/sfs"

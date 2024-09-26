@@ -24,7 +24,10 @@ func InitServer(
 	mux := chi.NewRouter()
 
 	/* Routes */
-	addRoutes(mux)
+	addRoutes(
+		mux,
+		*cfg,
+	)
 
 	/* Middleware */
 	var handler http.Handler = mux

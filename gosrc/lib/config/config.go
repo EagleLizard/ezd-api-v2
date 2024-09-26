@@ -12,8 +12,11 @@ import (
 )
 
 type JcdApiConfigType struct {
-	Host string
-	Port string
+	Host    string
+	Port    string
+	SfsHost string
+	SfsPort string
+	JcdEnv  string
 }
 
 var JcdApiConfig *JcdApiConfigType
@@ -22,6 +25,7 @@ var requiredEnvVars = [...]string{
 	"JCD_SESSION_SECRET",
 	"JCD_ENCRYPTION_SECRET",
 	"JCD_JWT_SECRET",
+	"JCD_ENV",
 }
 
 func init() {
@@ -37,10 +41,19 @@ func init() {
 	}
 
 	cfg := JcdApiConfigType{
-		Host: getEnvVarOrDefault("JCD_API_HOST", "0.0.0.0"),
-		Port: getEnvVarOrDefault("JCD_API_PORT", "4040"),
+		Host:    getEnvVarOrDefault("JCD_API_HOST", "0.0.0.0"),
+		Port:    getEnvVarOrDefault("JCD_API_PORT", "4040"),
+		SfsHost: getEnvVarOrDefault("SFS_HOST", "0.0.0.0"),
+		SfsPort: getEnvVarOrDefault("SFS_PORT", "4041"),
+		JcdEnv:  getEnvVar("JCD_ENV"),
 	}
 	JcdApiConfig = &cfg
+}
+
+func getEnvVar(envKey string) string {
+	envVal := os.Getenv(envKey)
+	/* maybe panic here. Does no default imply required? */
+	return envVal
 }
 
 func getEnvVarOrDefault(envKey string, defaultVal string) string {

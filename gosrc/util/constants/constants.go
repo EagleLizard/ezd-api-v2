@@ -13,6 +13,12 @@ import (
 
 const parentLvls = 4
 
+var LocalDir string
+
+func init() {
+	LocalDir = filepath.Join(BaseDir(), "_local")
+}
+
 func BaseDir() string {
 	_, filename, _, ok := runtime.Caller(0)
 	if !ok {
